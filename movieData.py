@@ -1,28 +1,40 @@
 import requests
 
-def get_movie_id(movie_title, API_KEY, BASE_URL):
+import requests
 
+def get_movie_id(movie_title, API_KEY, BASE_URL):
+    """Find the best matching movie title (case-insensitive, prefers exact matches)."""
     search_url = f"{BASE_URL}/search/movie"
-    params = {
-        "api_key": API_KEY,
-        "query": movie_title
-    }
+    params = {"api_key": API_KEY, "query": movie_title}
     
     response = requests.get(search_url, params=params)
     
-    if response.status_code == 200:
-        data = response.json()
-        results = data.get("results", [])
-        
-        if results:
-            first_movie = results[0]  # Take the first result as the most relevant
-            return first_movie["id"], first_movie["title"], first_movie["release_date"]
-        else:
-            print("No movies found for the given title.")
-            return None
-    else:
+    if response.status_code != 200:
         print(f"Error: {response.status_code}, {response.text}")
         return None
+
+    results = response.json().get("results", [])
+
+    if not results:
+        print("No movies found for the given title.")
+        return None
+
+    # Normalize input title
+    lower_title = movie_title.lower()
+    best_match = None
+
+    # Check all results for an exact match (case-insensitive)
+    for movie in results:
+        if movie["title"].lower() == lower_title:
+            best_match = movie  # Found an exact match, break early
+            break
+
+    # If no exact match, use the first result from the API
+    if not best_match:
+        best_match = results[0]
+
+    return best_match["id"], best_match["title"], best_match.get("release_date", "Unknown Release Date")
+
     
 
     
