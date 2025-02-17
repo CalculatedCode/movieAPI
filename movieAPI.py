@@ -13,7 +13,7 @@ API_KEY = os.getenv("API_KEY")
 BASE_URL = os.getenv("BASE_URL")
 DEEPL_API = os.getenv("DEEPL_API")
 DEEPL_URL = os.getenv("DEEPL_URL")
-VALID_API_KEYS = os.getenv("API_KEYS", "").split(",")  # Convert API keys to a list
+VALID_API_KEYS = [key.strip() for key in os.getenv("API_KEYS", "").split(",")] # Convert API keys to a list
 
 # Initialize Flask app
 app = Flask(__name__)
