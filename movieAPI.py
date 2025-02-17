@@ -10,6 +10,7 @@ API_KEY = os.getenv("API_KEY")
 BASE_URL = os.getenv("BASE_URL")
 DEEPL_API = os.getenv("DEEPL_API")
 DEEPL_URL = os.getenv("DEEPL_URL")
+VALID_API_KEYS = os.getenv("API_KEYS")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -31,6 +32,13 @@ def translate_quote(quote, target_lang, DEEPL_API, source_lang=None):
         return response.json()["translations"][0]["text"]
     else:
         return None  # Return None if translation fails
+    
+def authenticate_request():
+    """Check if the request contains a valid API key."""
+    api_key = request.headers.get("X-API-KEY")  # Read API key from request header
+    if not api_key or api_key not in VALID_API_KEYS:
+        return jsonify({"error": "Unauthorized. Invalid API key."}), 403
+
 
 def movie_api(movie_title, target_lang=None):
     """Fetch movie details, a quote, and optionally translate the quote."""
