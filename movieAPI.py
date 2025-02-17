@@ -72,7 +72,8 @@ def get_movie_id(movie_title, API_KEY, BASE_URL, release_year=None):
         print("No suitable match found.")
         return None
 
-    return best_match["id"], best_match["title"], best_match.get("release_date", "Unknown Release Date")
+    return best_match["id"], best_match.get("release_date", "Unknown Release Date"), best_match["title"]
+
 
 def movie_api(movie_title, target_lang=None, release_year=None):
     """Fetch movie details, a quote, and optionally translate the quote."""
