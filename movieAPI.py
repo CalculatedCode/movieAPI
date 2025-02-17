@@ -66,9 +66,9 @@ def movie_api(movie_title, target_lang=None):
 @app.route("/get_movie", methods=["POST"])
 def get_movie():
     """API endpoint to fetch movie data and optionally translate a quote."""
-    data = request.json  # Get JSON data from request
+    data = request.json
     movie_title = data.get("title")
-    target_lang = data.get("target_lang")  # Optional translation language
+    target_lang = data.get("target_lang") 
 
     if not movie_title:
         return jsonify({"error": "Movie title is required"}), 400
@@ -78,4 +78,4 @@ def get_movie():
 
 # Run the app
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(app.run(host="0.0.0.0", port=5000, debug=True))
