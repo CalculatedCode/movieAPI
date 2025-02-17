@@ -20,7 +20,9 @@ app = Flask(__name__)
 
 def authenticate_request():
     """Check if the request contains a valid API key."""
-    api_key = request.headers.get("X-API-KEY")  # Read API key from request header
+    api_key = request.headers.get("X-API-KEY")  
+    print(api_key)
+    print(VALID_API_KEYS)
     if not api_key or api_key not in VALID_API_KEYS:
         return jsonify({"error": "Unauthorized. Invalid API key."}), 403
     return None  # No error means authentication passed
