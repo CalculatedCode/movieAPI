@@ -4,9 +4,9 @@ from scrapeMovieQuotes import scrape_quote
 from dotenv import load_dotenv
 import os
 import requests
-from fuzzywuzzy import fuzz  # Install via: pip install fuzzywuzzy python-Levenshtein
+from fuzzywuzzy import fuzz 
 
-# Load environment variables
+
 load_dotenv()
 
 # API Keys
@@ -59,9 +59,9 @@ def get_movie_id(movie_title, API_KEY, BASE_URL, release_year=None):
         score = fuzz.ratio(lower_title, movie_title_lower)  # Compute similarity score
 
         # If a release year is provided, boost matches with correct year
-        movie_year = movie.get("release_date", "")[:4]  # Extract YYYY
+        movie_year = movie.get("release_date", "")[:4] 
         if release_year and movie_year == str(release_year):
-            score += 10  # Boost score for correct release year
+            score += 10  
 
         # Select the highest-scoring title
         if score > highest_score:
