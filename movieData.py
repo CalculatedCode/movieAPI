@@ -28,7 +28,7 @@ def get_movie_id(movie_title, BASE_URL, API_KEY, release_year=None):
         # If a release year is provided, boost matches with correct year
         movie_year = movie.get("release_date", "")[:4] 
         if release_year and movie_year == str(release_year):
-            score += 10  
+            score += 50  
 
         # Select the highest-scoring title
         if score > highest_score:
