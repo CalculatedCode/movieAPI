@@ -1,9 +1,8 @@
 import requests
+from fuzzywuzzy import fuzz
 
-import requests
-
-def get_movie_id(movie_title, API_KEY, BASE_URL):
-    """Find the best matching movie title (case-insensitive, prefers exact matches)."""
+def get_movie_id(movie_title, BASE_URL, API_KEY, release_year=None):
+    """Find the best matching movie using fuzzy matching and release year."""
     search_url = f"{BASE_URL}/search/movie"
     params = {"api_key": API_KEY, "query": movie_title}
     
@@ -14,24 +13,31 @@ def get_movie_id(movie_title, API_KEY, BASE_URL):
         return None
 
     results = response.json().get("results", [])
-
     if not results:
         print("No movies found for the given title.")
         return None
 
-    # Normalize input title
     lower_title = movie_title.lower()
     best_match = None
+    highest_score = 0
 
-    # Check all results for an exact match (case-insensitive)
     for movie in results:
-        if movie["title"].lower() == lower_title:
-            best_match = movie  # Found an exact match, break early
-            break
+        movie_title_lower = movie["title"].lower()
+        score = fuzz.ratio(lower_title, movie_title_lower)  # Compute similarity score
 
-    # If no exact match, use the first result from the API
+        # If a release year is provided, boost matches with correct year
+        movie_year = movie.get("release_date", "")[:4] 
+        if release_year and movie_year == str(release_year):
+            score += 10  
+
+        # Select the highest-scoring title
+        if score > highest_score:
+            highest_score = score
+            best_match = movie
+
     if not best_match:
-        best_match = results[0]
+        print("No suitable match found.")
+        return None
 
     return best_match["id"], best_match["title"], best_match.get("release_date", "Unknown Release Date")
 
@@ -39,7 +45,7 @@ def get_movie_id(movie_title, API_KEY, BASE_URL):
 
     
 
-def get_movie_data(movie_id, API_KEY, BASE_URL):
+def get_movie_data(movie_id, BASE_URL, API_KEY):
     movie_url = f"{BASE_URL}/movie/{movie_id}"
     params = {
         "api_key": API_KEY,

@@ -1,10 +1,17 @@
 from flask import Flask, request, jsonify
-from movieData import get_movie_data
+from movieData import get_movie_data, get_movie_id
 from scrapeMovieQuotes import scrape_quote
 from dotenv import load_dotenv
 import os
 import requests
 from fuzzywuzzy import fuzz 
+
+import logging
+import sys
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+
 
 
 load_dotenv()
@@ -16,8 +23,11 @@ DEEPL_API = os.getenv("DEEPL_API")
 DEEPL_URL = os.getenv("DEEPL_URL")
 VALID_API_KEYS = [key.strip() for key in os.getenv("API_KEYS", "").split(",")]  # Convert API keys to a list
 
+print(BASE_URL)
+
 # Initialize Flask app
 app = Flask(__name__)
+
 
 def authenticate_request():
     """Check if the request contains a valid API key."""
@@ -34,58 +44,24 @@ def translate_quote(quote, target_lang):
     response = requests.post(DEEPL_URL, data=params, headers=headers)
     return response.json()["translations"][0]["text"] if response.status_code == 200 else None
 
-def get_movie_id(movie_title, API_KEY, BASE_URL, release_year=None):
-    """Find the best matching movie using fuzzy matching and release year."""
-    search_url = f"{BASE_URL}/search/movie"
-    params = {"api_key": API_KEY, "query": movie_title}
-    
-    response = requests.get(search_url, params=params)
-    
-    if response.status_code != 200:
-        print(f"Error: {response.status_code}, {response.text}")
-        return None
-
-    results = response.json().get("results", [])
-    if not results:
-        print("No movies found for the given title.")
-        return None
-
-    lower_title = movie_title.lower()
-    best_match = None
-    highest_score = 0
-
-    for movie in results:
-        movie_title_lower = movie["title"].lower()
-        score = fuzz.ratio(lower_title, movie_title_lower)  # Compute similarity score
-
-        # If a release year is provided, boost matches with correct year
-        movie_year = movie.get("release_date", "")[:4] 
-        if release_year and movie_year == str(release_year):
-            score += 10  
-
-        # Select the highest-scoring title
-        if score > highest_score:
-            highest_score = score
-            best_match = movie
-
-    if not best_match:
-        print("No suitable match found.")
-        return None
-
-    return best_match["id"], best_match.get("release_date", "Unknown Release Date"), best_match["title"]
 
 
-def movie_api(movie_title, target_lang=None, release_year=None):
+def movie_api(movie_title, BASE_URL, API_KEY, target_lang=None, release_year=None):
     """Fetch movie details, a quote, and optionally translate the quote."""
     try:
-        movie_data = get_movie_data(*get_movie_id(movie_title, API_KEY, BASE_URL, release_year))
+        movie_id, title, release_date = get_movie_id(movie_title, BASE_URL, API_KEY, release_year)
+
+        movie_data = get_movie_data(movie_id, BASE_URL, API_KEY)
 
         title = movie_data.get('title', 'Unknown Title')
         overview = movie_data.get('overview', 'No description available.')
         poster_url = movie_data.get('poster_url', 'No poster available.')
-
         quote = scrape_quote(title)
-        translated_quote = translate_quote(quote, target_lang) if target_lang else None
+
+        if target_lang is not None:
+            translated_quote = translate_quote(quote, target_lang)
+        else:
+            translated_quote = None
 
         return {
             "title": title,
@@ -112,7 +88,7 @@ def get_movie():
     if not movie_title:
         return jsonify({"error": "Movie title is required"}), 400
 
-    result = movie_api(movie_title, target_lang, release_year)
+    result = movie_api(movie_title, BASE_URL, API_KEY, target_lang, release_year)
     return jsonify(result)
 
 # Run the app
