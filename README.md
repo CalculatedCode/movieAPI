@@ -76,7 +76,7 @@ translated_quote = response.get('translated_quote')
 ```json
 {
   "title": "Inception",
-  "description": "A thief who enters the dreams of others to steal secrets...",
+  "description": "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: "inception", the implantation of another person's idea into a target's subconscious."
   "poster_url": "https://image.tmdb.org/t/p/w500/someposter.jpg",
   "quote": "“Don't you want to take a leap of faith ? Or become an old man, filled with regret, waiting to die alone!”",
   "translated_quote": '"Tu ne veux pas faire un saut dans la foi ? Ou devenir un vieil homme, rempli de regrets, attendant de mourir seul !"'
@@ -104,7 +104,7 @@ The API provides error responses in the following scenarios:
 
 ---
 ## **UML Diagram**
-
+![Movie API Sequence Diagram](./Sequence_diagram.png)
 ## **Important Notes**
 - **Ensure that your API key is valid** before making requests.  
 - **Movie searches are case-insensitive**, providing a `release_year` improves accuracy.  
