@@ -97,8 +97,7 @@ The API provides error responses in the following scenarios:
 
 ```json
 {
-  "error": "Invalid API Key",
-  "status": 403
+  "error": "Invalid API Key"
 }
 ```
 
