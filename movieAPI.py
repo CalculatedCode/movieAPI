@@ -75,7 +75,7 @@ def movie_api(movie_title, BASE_URL, API_KEY, target_lang=None, release_year=Non
 
 @app.route("/get_movie", methods=["POST"])
 def get_movie():
-    """API endpoint to fetch movie data and optionally translate a quote."""
+    print("Authenticating")
     auth_error = authenticate_request()
     if auth_error:
         return auth_error  # Return 403 if authentication fails
@@ -87,8 +87,9 @@ def get_movie():
 
     if not movie_title:
         return jsonify({"error": "Movie title is required"}), 400
-
+    print("request recieved, processing....")
     result = movie_api(movie_title, BASE_URL, API_KEY, target_lang, release_year)
+    print("request processed, returning result to user")
     return jsonify(result)
 
 # Run the app
