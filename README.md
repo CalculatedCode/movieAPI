@@ -1,4 +1,4 @@
-# **Movie Data REST API - Communication Contract**  
+# **Movie Data REST API**  
 
 This microservice provides movie information, movie quotes, and optional translations. The API retrieves movie details from The Movie Database (TMDb), scrapes movie quotes from MovieQuotes.com, and optionally translates quotes into a specified language using DEEPL.  
 
@@ -50,7 +50,6 @@ data = {
 }
 
 response = requests.post(url, json=data, headers=headers)
-print(response.json())
 ```
 
 ---
@@ -63,7 +62,16 @@ If the request is successful, the API responds with a JSON object containing:
 - `"quote"` *(string)* – A randomly selected quote from the movie.  
 - `"translated_quote"` *(string or None)* – The translated quote (if translation was requested and target_lang is not 'en').  
 
-### **Example Response**  
+### **Example Response**
+```python
+response = requests.post(url, json=data, headers=headers)
+response = response.json()
+title = response.get('title')
+description = response.get('description')
+poster_url = response.get('poster_url')
+quote = response.get('quote')
+translated_quote = response.get('translated_quote')
+```
 
 ```json
 {
@@ -95,6 +103,7 @@ The API provides error responses in the following scenarios:
 ```
 
 ---
+## **UML Diagram**
 
 ## **Important Notes**
 - **Ensure that your API key is valid** before making requests.  
