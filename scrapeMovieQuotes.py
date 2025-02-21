@@ -59,4 +59,3 @@ def scrape_quote(title):
 
 
 
-#drop punctuation and unimportant words for comparison [the, a, of, etc]
