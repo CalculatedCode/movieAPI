@@ -104,7 +104,7 @@ The API provides error responses in the following scenarios:
 
 ---
 ## **UML Diagram**
-
+![Movie API Sequence Diagram](./Sequence_diagram.png)
 ## **Important Notes**
 - **Ensure that your API key is valid** before making requests.  
 - **Movie searches are case-insensitive**, providing a `release_year` improves accuracy.  
