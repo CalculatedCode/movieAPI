@@ -17,13 +17,15 @@ handler.setLevel(logging.INFO)
 load_dotenv()
 
 # API Keys
-API_KEY = os.getenv("API_KEY")
-BASE_URL = os.getenv("BASE_URL")
+
+MOVIE_DB_API_KEY = os.getenv("API_KEY")
+MOVIE_DB_BASE_URL = os.getenv("BASE_URL")
 DEEPL_API = os.getenv("DEEPL_API")
 DEEPL_URL = os.getenv("DEEPL_URL")
-VALID_API_KEYS = [key.strip() for key in os.getenv("API_KEYS", "").split(",")]  # Convert API keys to a list
+#This services API keys as list
+VALID_API_KEYS = [key.strip() for key in os.getenv("API_KEYS", "").split(",")] 
 
-print(BASE_URL)
+print(MOVIE_DB_BASE_URL)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -31,10 +33,10 @@ app = Flask(__name__)
 
 def authenticate_request():
     """Check if the request contains a valid API key."""
-    api_key = request.headers.get("X-API-KEY")  
-    if not api_key or api_key not in VALID_API_KEYS:
+    MOVIE_DB_API_KEY = request.headers.get("X-API-KEY")  
+    if not MOVIE_DB_API_KEY or MOVIE_DB_API_KEY not in VALID_API_KEYS:
         return jsonify({"error": "Unauthorized. Invalid API key."}), 403
-    return None  # No error means authentication passed
+    return None 
 
 def translate_quote(quote, target_lang):
     """Translate a movie quote using DeepL API."""
@@ -46,23 +48,25 @@ def translate_quote(quote, target_lang):
 
 
 
-def movie_api(movie_title, BASE_URL, API_KEY, target_lang=None, release_year=None):
+def movie_api(movie_title, MOVIE_DB_BASE_URL, MOVIE_DB_API_KEY, target_lang=None, release_year=None):
     """Fetch movie details, a quote, and optionally translate the quote."""
     try:
-        movie_id, title, release_date = get_movie_id(movie_title, BASE_URL, API_KEY, release_year)
+        movie_id, title, release_date = get_movie_id(movie_title, MOVIE_DB_BASE_URL, MOVIE_DB_API_KEY, release_year)
 
-        movie_data = get_movie_data(movie_id, BASE_URL, API_KEY)
+        movie_data = get_movie_data(movie_id, MOVIE_DB_BASE_URL, MOVIE_DB_API_KEY)
 
         title = movie_data.get('title', 'Unknown Title')
         overview = movie_data.get('overview', 'No description available.')
         poster_url = movie_data.get('poster_url', 'No poster available.')
         quote = scrape_quote(title)
 
+        #Check if tranlation is requested and translate
         if target_lang is not None:
             translated_quote = translate_quote(quote, target_lang)
         else:
             translated_quote = None
 
+        #Return all required data
         return {
             "title": title,
             "description": overview,
@@ -75,21 +79,29 @@ def movie_api(movie_title, BASE_URL, API_KEY, target_lang=None, release_year=Non
 
 @app.route("/get_movie", methods=["POST"])
 def get_movie():
+    """Main function that processes JSON and sends results back to user"""
+
+    #check authentication
     print("Authenticating")
     auth_error = authenticate_request()
     if auth_error:
         return auth_error  # Return 403 if authentication fails
 
+    #Parse JSON Request
     data = request.json
     movie_title = data.get("title")
     target_lang = data.get("target_lang")
-    release_year = data.get("release_year")  # Optional release year
+    release_year = data.get("release_year")
 
+    #Validate request
     if not movie_title:
         return jsonify({"error": "Movie title is required"}), 400
     print("request recieved, processing....")
-    result = movie_api(movie_title, BASE_URL, API_KEY, target_lang, release_year)
+
+    #Get values to return to user.
+    result = movie_api(movie_title, MOVIE_DB_BASE_URL, MOVIE_DB_API_KEY, target_lang, release_year)
     print("request processed, returning result to user")
+    #Return result
     return jsonify(result)
 
 # Run the app
